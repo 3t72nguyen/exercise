@@ -29,6 +29,7 @@
   --work-soft: #d7e2bd;
   --rest: #25688f;
   --rest-soft: #cbe0ec;
+  --warn: #a85a0c;
   --on-accent: #f7f6ee;
   --focus: #1c2016;
   --font-display: "Saira Stencil One", "Impact", "Arial Narrow", sans-serif;
@@ -38,14 +39,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #13160e; --surface: #1c2116; --fg: #e7e5d4; --muted: #99a087; --line: #333a28;
-    --work: #a8cc4a; --work-soft: #2b3718; --rest: #6fb2db; --rest-soft: #1a2f3d;
+    --work: #a8cc4a; --work-soft: #2b3718; --rest: #6fb2db; --rest-soft: #1a2f3d; --warn: #f0a640;
     --on-accent: #13160e; --focus: #e7e5d4;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #13160e; --surface: #1c2116; --fg: #e7e5d4; --muted: #99a087; --line: #333a28;
-  --work: #a8cc4a; --work-soft: #2b3718; --rest: #6fb2db; --rest-soft: #1a2f3d;
+  --work: #a8cc4a; --work-soft: #2b3718; --rest: #6fb2db; --rest-soft: #1a2f3d; --warn: #f0a640;
   --on-accent: #13160e; --focus: #e7e5d4;
   color-scheme: dark;
 }
@@ -64,7 +65,7 @@ body {
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.wrap { max-width: 428px; margin: 0 auto; display: grid; gap: 12px; }
+.wrap { max-width: 428px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 button, select { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
@@ -100,11 +101,11 @@ body[data-phase="complete"] .chip { background: var(--fg); color: var(--bg); }
 .btn:disabled { opacity: 0.38; cursor: not-allowed; }
 .btn.go { width: 100%; min-height: 60px; font-size: 24px; background: var(--work); border-color: var(--work); color: var(--on-accent); margin-top: 12px; }
 
-.rest { display: grid; grid-template-columns: 148px 1fr; gap: 14px; align-items: center; }
+.rest { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 14px; align-items: center; }
 .rest h2 { grid-column: 1 / -1; margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 16px; letter-spacing: 0.06em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: baseline; }
 .rest h2 b { font-weight: 400; }
 .rest h2 span { font-family: var(--font-num); font-weight: 600; font-size: 14px; letter-spacing: 0.1em; color: var(--muted); }
-.dial { position: relative; width: 148px; height: 148px; display: grid; place-items: center; }
+.dial { position: relative; width: 168px; height: 168px; display: grid; place-items: center; }
 .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
 .dial .track { fill: none; stroke: var(--line); stroke-width: 9; }
 .dial .arc { fill: none; stroke: var(--muted); stroke-width: 9; }
@@ -113,10 +114,13 @@ body[data-phase="hold"] .dial .arc { stroke: var(--work); }
 body[data-phase="switch"] .dial .arc { stroke: var(--rest); }
 body[data-phase="switch"] .chip { background: var(--rest); }
 body[data-phase="switch"] .item.cur { background: var(--rest-soft); }
-.secs { position: relative; text-align: center; font-family: var(--font-num); font-weight: 600; font-size: 64px; line-height: 1; font-variant-numeric: tabular-nums; }
+.secs { position: relative; text-align: center; font-family: var(--font-num); font-weight: 600; font-size: 58px; line-height: 1; font-variant-numeric: tabular-nums; }
 .secs small { display: block; font-size: 13px; font-weight: 600; letter-spacing: 0.16em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
-.ctl { display: grid; gap: 8px; }
-.ctl .btn { min-height: 46px; font-size: 19px; }
+.ctl { display: grid; grid-template-rows: repeat(3, 1fr); gap: 8px; height: 168px; }
+.ctl .btn { min-height: 0; height: 100%; min-width: 0; font-size: 18px; letter-spacing: 0.04em; padding: 2px 6px; white-space: nowrap; overflow: hidden; }
+.secs .act { display: block; width: max-content; margin: 7px auto 0; padding: 3px 13px; border-radius: 999px; font-family: var(--font-num); font-weight: 700; font-size: 16px; letter-spacing: 0.14em; line-height: 1.25; text-transform: uppercase; background: var(--work); color: var(--on-accent); }
+.secs .act[data-mode="pause"] { background: var(--warn); }
+.secs .act[data-mode="resume"] { background: var(--rest); }
 
 .list h2 { margin: 0 0 4px; font-family: var(--font-display); font-weight: 400; font-size: 16px; letter-spacing: 0.06em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .link { background: none; border: 0; padding: 8px 0 8px 8px; cursor: pointer; font-family: var(--font-num); font-weight: 600; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
@@ -142,7 +146,9 @@ body[data-phase="rest"] .item.cur { background: var(--rest-soft); }
 .opts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
 .pace { display: flex; align-items: center; gap: 6px; font-family: var(--font-num); font-weight: 600; font-size: 17px; letter-spacing: 0.06em; text-transform: uppercase; }
 .pace .nav { width: 40px; min-height: 40px; font-size: 22px; }
-.pace b { min-width: 8ch; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pace b { min-width: 4.5ch; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.btn.small[aria-pressed="true"] { background: var(--work); border-color: var(--work); color: var(--on-accent); font-weight: 700; }
+.btn.small[aria-pressed="false"] { opacity: 0.75; }
 .btn.small { min-height: 40px; font-size: 16px; padding-inline: 12px; }
 
 button.name { display: block; width: 100%; background: none; border: 0; padding: 0; text-align: left; color: inherit; cursor: pointer; }
@@ -172,6 +178,9 @@ body.sheet-open { overflow: hidden; }
 .wheel-unit { position: absolute; right: 12px; top: 88px; height: 44px; display: flex; align-items: center; z-index: 3; pointer-events: none; font-family: var(--font-num); font-weight: 600; font-size: 19px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); max-width: 40%; line-height: 1; }
 .sheet-actions { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 8px; }
 .sheet-actions .btn { min-height: 52px; font-size: 16px; letter-spacing: 0.03em; padding-inline: 4px; white-space: nowrap; }
+.dial { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.dial:active { opacity: 0.85; }
+.dial:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 50%; }
 .ctl .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ctl .row2 .btn { font-size: 16px; padding-inline: 4px; white-space: nowrap; letter-spacing: 0.04em; }
 #bSkip[data-mode="set"] { background: var(--work-soft); }
@@ -224,28 +233,24 @@ body.sheet-open { overflow: hidden; }
       <img class="pose" id="pose" alt="">
     </div>
     <p class="upnext" id="upnext"></p>
-    <button class="btn go" id="bDone" type="button">Done · start rest</button>
   </section>
 
   <section class="card rest" aria-label="Rest stopwatch">
     <h2><b id="restTitle">Rest stopwatch</b> <span id="restState">30 sec</span></h2>
-    <div class="dial">
+    <div class="dial" id="dialBtn" role="button" tabindex="0" aria-label="Start">
       <svg viewBox="0 0 120 120" aria-hidden="true">
         <circle class="track" cx="60" cy="60" r="54"></circle>
         <circle class="arc" id="arc" cx="60" cy="60" r="54"></circle>
       </svg>
-      <div class="secs" id="secs" role="timer" aria-live="off">30<small>sec</small></div>
+      <div class="secs" id="secs" role="timer" aria-live="off">30<small>sec</small><span class="act" id="dialAct" data-mode="go">Start</span></div>
     </div>
     <div class="ctl">
-      <button class="btn" id="bToggle" type="button">Start</button>
-      <div class="row2">
-        <button class="btn" id="bReset" type="button">Reset</button>
-        <button class="btn" id="bFinish" type="button">Finish now</button>
-      </div>
+      <button class="btn" id="bReset" type="button">Stop</button>
+      <button class="btn" id="bFinish" type="button">Finish now</button>
       <button class="btn" id="bSkip" type="button" data-mode="set">Set rest &middot; 30s &#9662;</button>
     </div>
     <div class="opts">
-      <div class="pace"><span>Pace</span><button class="nav" id="paceMinus" type="button" aria-label="Faster">&minus;</button><b id="paceVal">2.0 s/rep</b><button class="nav" id="pacePlus" type="button" aria-label="Slower">+</button></div>
+      <div class="pace" title="Seconds per rep"><span>Pace</span><button class="nav" id="paceMinus" type="button" aria-label="Faster">&minus;</button><b id="paceVal">2.0 s/rep</b><button class="nav" id="pacePlus" type="button" aria-label="Slower">+</button></div>
       <button class="btn small" id="bVoice" type="button" aria-pressed="true">Voice: on</button>
     </div>
   </section>
@@ -312,17 +317,17 @@ var DAYS = [
   var $ = function (id) { return document.getElementById(id); };
   var el = {
     day: $("day"), prev: $("prev"), next: $("next"), chip: $("chip"), pos: $("pos"), name: $("name"), pose: $("pose"),
-    upnext: $("upnext"), bDone: $("bDone"), arc: $("arc"), secs: $("secs"), restState: $("restState"), restTitle: $("restTitle"), setLine: $("setLine"), setsLeft: $("setsLeft"), setMinus: $("setMinus"), setPlus: $("setPlus"), paceMinus: $("paceMinus"), pacePlus: $("pacePlus"), paceVal: $("paceVal"), bVoice: $("bVoice"),
-    bToggle: $("bToggle"), bReset: $("bReset"), bSkip: $("bSkip"), listTitle: $("listTitle"), items: $("items"), bClear: $("bClear")
+    upnext: $("upnext"), arc: $("arc"), secs: $("secs"), restState: $("restState"), restTitle: $("restTitle"), setLine: $("setLine"), setsLeft: $("setsLeft"), setMinus: $("setMinus"), setPlus: $("setPlus"), paceMinus: $("paceMinus"), pacePlus: $("pacePlus"), paceVal: $("paceVal"), bVoice: $("bVoice"),
+    bReset: $("bReset"), bSkip: $("bSkip"), listTitle: $("listTitle"), items: $("items"), bClear: $("bClear")
   };
   el.arc.style.strokeDasharray = CIRC;
   el.unit = el.secs.querySelector("small");
 
   var day = 0, cur = 0, phase = "exercise", done = [], running = false, endAt = 0, restLeft = REST, total = REST, side = 1, lastWhole = -1, wake = null,
-      setNo = 1, sets = 3, tempo = 2000, voiceOn = true, repR = 0, repN = 0, repStarted = false, repNext = 0, repLeft = 3000, skipNext = false;
+      setNo = 1, sets = 3, tempo = 2000, voiceOn = true, repR = 0, repN = 0, repStarted = false, repNext = 0, repLeft = 3000, skipNext = false, swKind = "side";
   try {
     var ss = parseInt(localStorage.getItem("calisthenics-sets"), 10); if (ss >= 1 && ss <= 10) sets = ss;
-    var tt = parseInt(localStorage.getItem("calisthenics-tempo"), 10); if (tt >= 1000 && tt <= 6000) tempo = tt;
+    var tt = parseInt(localStorage.getItem("calisthenics-tempo"), 10); if (tt >= 500 && tt <= 6000) tempo = Math.round(tt / 100) * 100;
     if (localStorage.getItem("calisthenics-voice") === "off") voiceOn = false;
     var rs = parseInt(localStorage.getItem("calisthenics-rest"), 10); if (rs >= 0 && rs <= 180) REST = rs * 1000;
   } catch (e) {}
@@ -354,9 +359,40 @@ var DAYS = [
   document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && running) lock(); });
 
   /* logic */
+  var WORDS = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
+  var ptVoice = null;
+  function pickVoice() {
+    try {
+      var vs = window.speechSynthesis.getVoices(); if (!vs || !vs.length) return;
+      var best = null, bs = -1;
+      vs.forEach(function (v) {
+        if (!/^en/i.test(v.lang)) return;
+        var sc = 0, n = v.name + " " + v.lang;
+        if (/premium|enhanced|natural|neural|siri/i.test(n)) sc += 6;
+        if (/en[-_]AU/i.test(v.lang)) sc += 4; else if (/en[-_]GB/i.test(v.lang)) sc += 3; else if (/en[-_]US/i.test(v.lang)) sc += 2;
+        if (/google/i.test(n)) sc += 2;
+        if (/karen|lee|daniel|oliver|matilda|samantha|serena|aaron|nicky|tessa/i.test(v.name)) sc += 2;
+        if (/compact|fred|albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|junior|kathy|organ|princess|ralph|trinoids|whisper|zarvox|novelty|eloquence/i.test(v.name)) sc -= 10;
+        if (v.localService) sc += 1;
+        if (sc > bs) { bs = sc; best = v; }
+      });
+      ptVoice = best;
+    } catch (e) {}
+  }
+  try { if (window.speechSynthesis) { pickVoice(); window.speechSynthesis.addEventListener("voiceschanged", pickVoice); } } catch (e) {}
   function speak(txt) {
     if (!voiceOn) return;
-    try { if (!window.speechSynthesis) return; window.speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(txt); u.rate = 1.05; window.speechSynthesis.speak(u); } catch (e) {}
+    try {
+      if (!window.speechSynthesis) return;
+      var ss = window.speechSynthesis; if (ss.speaking || ss.pending) ss.cancel();
+      var n = parseInt(txt, 10), say = (n >= 0 && n <= 20 && String(n) === String(txt)) ? WORDS[n] : txt;
+      var u = new SpeechSynthesisUtterance(say);
+      if (ptVoice) { u.voice = ptVoice; u.lang = ptVoice.lang; } else u.lang = "en-AU";
+      if (phase === "reps") { u.rate = tempo >= 1500 ? 0.92 : (tempo >= 1000 ? 1.0 : 1.08); u.pitch = 0.92; }
+      else { u.rate = 0.95; u.pitch = 0.95; }
+      u.volume = 1;
+      setTimeout(function () { ss.speak(u); }, 0);
+    } catch (e) {}
   }
   function hush() { try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {} }
   var OV = {};
@@ -406,8 +442,8 @@ var DAYS = [
   function beginExercise(prefix, quiet) {
     prefix = prefix || "";
     if (isHold(cur)) {
-      side = 1; startTimer("hold"); if (!quiet) beep(660, 0, 0.18, 0.28, "triangle");
-      speak(prefix + Math.round(total / 1000) + " second " + (isSide(cur) ? "side plank, each side" : "plank hold") + ". Get ready.");
+      side = 1; swKind = "ready"; startTimer("switch"); if (!quiet) beep(660, 0, 0.18, 0.28, "triangle");
+      speak(prefix + Math.round(holdMs(cur) / 1000) + " second " + (isSide(cur) ? "side plank, each side" : "plank hold") + ". Get ready.");
       return true;
     }
     if (isReps(cur)) {
@@ -425,7 +461,7 @@ var DAYS = [
     finishExercise(false);
   }
   function afterSide() {
-    if (isSide(cur) && side === 1) { side = 2; startTimer("switch"); speak("Switch sides"); renderAll(); return; }
+    if (isSide(cur) && side === 1) { side = 2; swKind = "side"; startTimer("switch"); speak("Switch sides"); renderAll(); return; }
     finishExercise(true);
   }
   function holdEnd() {
@@ -441,7 +477,7 @@ var DAYS = [
   function switchEnd() {
     if (isReps(cur)) startReps(1000); else startTimer("hold");
     beep(880, 0, 0.14, 0.32, "triangle"); beep(1320, 0.2, 0.4, 0.34, "triangle"); buzz([200, 100, 200]);
-    speak("Other side.");
+    speak(swKind === "ready" ? "Go." : "Other side.");
     renderAll();
   }
   function endRest(silent) {
@@ -470,6 +506,14 @@ var DAYS = [
     if (phase === "reps") { repR = repN; repStarted = false; repLeft = 3000; } else restLeft = total;
     renderAll();
   }
+  function primary() {
+    audio();
+    if (phase === "complete" || phase === "exercise") exerciseDone(); else toggle();
+  }
+  function stopBtn() {
+    if (phase === "rest") { running = false; lastWhole = -1; unlock(); hush(); restLeft = total; renderAll(); }
+    else if (phase === "reps" || phase === "hold" || phase === "switch") { phase = "exercise"; stopTimer(); renderAll(); }
+  }
   function finish() {
     if (phase === "switch") { if (isReps(cur)) startReps(1000); else startTimer("hold"); renderAll(); }
     else if (phase === "hold" || phase === "reps") { running = false; unlock(); hush(); afterSide(); }
@@ -486,7 +530,7 @@ var DAYS = [
     else sets = Math.max(Math.max(1, setNo), Math.min(10, sets + delta));
     save(); renderAll();
   }
-  function changePace(delta) { tempo = Math.max(1000, Math.min(6000, tempo + delta)); save(); renderAll(); }
+  function changePace(delta) { tempo = Math.round(Math.max(500, Math.min(6000, tempo + delta)) / 100) * 100; save(); renderAll(); }
 
   setInterval(function () {
     if (!running) return;
@@ -495,7 +539,9 @@ var DAYS = [
       if (now >= repNext) {
         if (!repStarted) repStarted = true;
         else { repR -= 1; if (repR <= 0) { repsEnd(); return; } }
-        speak(String(repR)); beep(1500, 0, 0.03, 0.1, "square");
+        speak(String(repR));
+        if (repR >= 1 && repR <= 3) { beep(1175, 0, 0.12, 0.3, "square"); if (repR === 1) beep(1568, 0.14, 0.12, 0.3, "square"); buzz([60]); }
+        else beep(1500, 0, 0.03, 0.1, "square");
         repNext += tempo; if (repNext < now) repNext = now + tempo;
         renderTimer();
       }
@@ -504,7 +550,13 @@ var DAYS = [
     var rem = endAt - now;
     if (rem <= 0) { if (phase === "hold") holdEnd(); else if (phase === "switch") switchEnd(); else endRest(false); return; }
     var whole = Math.ceil(rem / 1000);
-    if (whole !== lastWhole) { lastWhole = whole; if (whole <= 3) beep(988, 0, 0.12, 0.28, "square"); else beep(1800, 0, 0.03, 0.12, "square"); }
+    if (whole !== lastWhole) {
+      lastWhole = whole;
+      if (phase === "hold" && voiceOn) speak(String(whole));
+      else if (phase === "switch" && voiceOn && whole <= 3) speak(String(whole));
+      else if (whole <= 3) { beep(1175, 0, 0.18, 0.35, "square"); buzz([80]); }
+      else beep(1800, 0, 0.03, 0.12, "square");
+    }
     renderTimer();
   }, 100);
 
@@ -533,39 +585,40 @@ var DAYS = [
     el.setsLeft.textContent = String(leftSets);
     el.setMinus.disabled = sets <= Math.max(1, setNo);
     el.setPlus.disabled = sets >= 10;
-    el.paceVal.textContent = (tempo / 1000).toFixed(1) + " s/rep";
-    el.paceMinus.disabled = tempo <= 1000; el.pacePlus.disabled = tempo >= 6000;
-    el.bVoice.textContent = "Voice: " + (voiceOn ? "on" : "off"); el.bVoice.setAttribute("aria-pressed", voiceOn ? "true" : "false");
+    el.paceVal.textContent = (tempo / 1000).toFixed(1) + "s";
+    el.paceMinus.disabled = tempo <= 500; el.pacePlus.disabled = tempo >= 6000;
+    el.bVoice.textContent = (voiceOn ? "\uD83D\uDD0A Voice: ON" : "\uD83D\uDD07 Voice: off"); el.bVoice.setAttribute("aria-pressed", voiceOn ? "true" : "false");
 
+    var primaryLabel = "Start";
     if (phase === "complete") {
       el.chip.textContent = "Complete"; el.pos.textContent = "All " + n + " exercises done";
       el.name.textContent = "Day " + (day + 1) + " finished"; el.upnext.innerHTML = "Great work. Reset to go again.";
-      el.bDone.textContent = "Restart day";
+      primaryLabel = "Restart";
     } else {
-      el.chip.textContent = phase === "rest" ? "Rest" : phase === "switch" ? "Switch sides"
+      el.chip.textContent = phase === "rest" ? "Rest" : phase === "switch" ? (swKind === "ready" ? "Get ready" : "Switch sides")
         : (phase === "hold" || phase === "reps") ? (isSide(cur) ? "Side " + side + " of 2" : (phase === "reps" ? "Reps" : "Plank hold")) : "Exercise";
       el.pos.textContent = "Exercise " + (cur + 1) + " of " + n + " · tap to adjust";
       el.name.textContent = nameOf(cur);
       var nx = cur + 1 < n ? nameOf(cur + 1) : "", lastEx = cur >= n - 1;
       var after = skipNext ? (nx ? "go straight to <b>" + nx + "</b>" : (setNo < sets ? "start <b>set " + (setNo + 1) + "</b>" : "<b>finish the day</b>")) : (nx ? "rest and <b>" + nx + "</b>" : (setNo < sets ? "rest and start <b>set " + (setNo + 1) + "</b>" : "<b>finish the day</b>"));
       el.upnext.innerHTML = phase === "rest" ? "Rest, then <b>" + (nx || (setNo < sets ? "set " + (setNo + 1) : "finish")) + "</b>" + (nx || setNo < sets ? " starts automatically" : "")
-        : phase === "switch" ? "Get in position on the other side. Side 2 starts automatically."
+        : phase === "switch" ? (swKind === "ready" ? "Get into position. The timer starts automatically." : "Get in position on the other side. Side 2 starts automatically.")
         : (phase === "hold" || phase === "reps") && isSide(cur) && side === 1 ? (phase === "reps" ? "Count down with the voice, then switch sides." : "Hold steady. Switch sides when the time is up.")
         : phase === "reps" ? "Move with the voice count, then " + after
         : phase === "hold" ? "Hold steady, then " + after
         : (nx ? "Up next after rest: <b>" + nx + "</b>" : (setNo < sets ? "Last exercise of set " + setNo + ". Then rest and <b>set " + (setNo + 1) + "</b>" : "Last exercise of the day"));
-      el.bDone.textContent = hold ? (isSide(cur) ? "Start side plank · " + Math.round(holdMs(cur) / 1000) + "s each side" : "Start plank hold · " + Math.round(holdMs(cur) / 1000) + "s")
-        : reps ? (isSide(cur) ? "Start · " + repsOf(cur) + " each leg" : "Start reps · " + repsOf(cur))
-        : (lastEx && setNo >= sets ? "Done · finish day" : "Done · start rest");
+      primaryLabel = (hold || reps) ? "Start" : "Done";
     }
-    el.bDone.disabled = on;
-    el.bToggle.textContent = running ? "Pause" : (phase === "reps" ? (repStarted || repR < repN ? "Resume" : "Start") : (restLeft < total ? "Resume" : "Start"));
+    var started = phase === "reps" ? true : (restLeft < total);
+    var label = (phase === "complete" || phase === "exercise") ? primaryLabel : running ? "Pause" : (started ? "Resume" : "Start");
+    el.dialAct.textContent = label; el.dialAct.setAttribute("data-mode", running ? "pause" : (label === "Resume" ? "resume" : "go"));
+    el.dialBtn.setAttribute("aria-label", label);
     var working = phase === "hold" || phase === "reps" || phase === "switch";
-    el.bToggle.disabled = !on; el.bReset.disabled = !on; el.bFinish.disabled = !working; el.bSkip.disabled = false;
-    el.bFinish.textContent = phase === "switch" ? "Start side 2" : (isSide(cur) && side === 1 ? "Next side" : "Finish now");
+    el.bReset.disabled = !on; el.bFinish.disabled = !working; el.bSkip.disabled = false;
+    el.bFinish.textContent = phase === "switch" ? (swKind === "ready" ? "Start now" : "Start side 2") : (isSide(cur) && side === 1 ? "Next side" : "Finish now");
     el.bSkip.textContent = phase === "rest" ? "Skip rest" : working ? (skipNext ? "Rest skipped \u2713" : "Skip rest") : "Set rest \u00B7 " + Math.round(REST / 1000) + "s \u25BE";
     el.bSkip.setAttribute("data-mode", phase === "rest" ? "skip" : working ? (skipNext ? "armed" : "skip") : "set");
-    el.restTitle.textContent = phase === "switch" ? "Switch sides"
+    el.restTitle.textContent = phase === "switch" ? (swKind === "ready" ? "Get ready" : "Switch sides")
       : (phase === "reps" || (phase === "exercise" && reps)) ? "Rep counter"
       : (phase === "hold" || (phase === "exercise" && hold)) ? (isSide(cur) ? "Side plank timer" : "Plank hold timer") : "Rest stopwatch";
     el.restState.textContent = on ? (running ? "running" : "paused")
@@ -585,7 +638,9 @@ var DAYS = [
   var ROW = 44, STEP = 22 * Math.PI / 180, DR = ROW / STEP;
   var sheetMode = "ex", sheetIdx = 0, wheelN = 101, wheelTotal = 303, wheelVal = 0, wheelLo = 0, wheelHi = -1, wheelRaf = 0, wheelTimer = 0, holding = false, sheetOpener = null;
   var sh = { box: $("sheet"), actions: $("sheetActions"), title: $("sheetTitle"), sub: $("sheetSub"), wheel: $("wheel"), unit: $("wheelUnit"), close: $("sheetClose"), save: $("sheetSave"), go: $("sheetGo"), reset: $("sheetReset") };
-  el.bFinish = $("bFinish");
+  el.bFinish = $("bFinish"); el.dialBtn = $("dialBtn"); el.dialAct = $("dialAct");
+  el.dialBtn.addEventListener("click", primary);
+  el.dialBtn.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); primary(); } });
   function wheelStyle(i, pos) {
     var it = sh.wheel.children[i]; if (!it) return;
     var d = i - pos, a = Math.abs(d);
@@ -697,17 +752,22 @@ var DAYS = [
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sh.box.hidden) closeSheet(); });
 
   /* events */
-  el.bDone.addEventListener("click", exerciseDone);
   el.name.addEventListener("click", function () { if (phase !== "complete") openSheet(cur); });
-  el.bToggle.addEventListener("click", toggle);
-  el.bReset.addEventListener("click", resetTimer);
+  el.bReset.addEventListener("click", stopBtn);
   el.bSkip.addEventListener("click", restBtn);
   el.bFinish.addEventListener("click", finish);
   el.bClear.addEventListener("click", resetDay);
   el.setMinus.addEventListener("click", function () { changeSets(-1); });
   el.setPlus.addEventListener("click", function () { changeSets(1); });
-  el.paceMinus.addEventListener("click", function () { changePace(-500); });
-  el.pacePlus.addEventListener("click", function () { changePace(500); });
+  function holdRepeat(btn, d) {
+    var t1 = null, t2 = null, used = false;
+    function stop() { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; }
+    btn.addEventListener("pointerdown", function (e) { used = true; changePace(d); stop(); t1 = setTimeout(function () { t2 = setInterval(function () { changePace(d); }, 70); }, 450); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(function (n) { btn.addEventListener(n, stop); });
+    btn.addEventListener("click", function () { if (used) { used = false; return; } changePace(d); });
+    btn.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+  }
+  holdRepeat(el.paceMinus, -100); holdRepeat(el.pacePlus, 100);
   el.bVoice.addEventListener("click", function () { voiceOn = !voiceOn; save(); if (!voiceOn) hush(); else speak("Voice on"); renderAll(); });
   el.day.addEventListener("change", function () { loadDay(parseInt(el.day.value, 10) || 0); });
   el.prev.addEventListener("click", function () { if (day > 0) loadDay(day - 1); });
