@@ -1,0 +1,8 @@
+{
+  "appId": "com.example.militarycalisthenics",
+  "appName": "Calisthenics",
+  "webDir": "web",
+  "ios": {
+    "contentInset": "always"
+  }
+}

@@ -145,6 +145,44 @@ body[data-phase="rest"] .item.cur { background: var(--rest-soft); }
 .pace b { min-width: 8ch; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
 .btn.small { min-height: 40px; font-size: 16px; padding-inline: 12px; }
 
+button.name { display: block; width: 100%; background: none; border: 0; padding: 0; text-align: left; color: inherit; cursor: pointer; }
+button.name:active { opacity: 0.7; }
+.item .t { flex: 1; }
+.item .edit { margin-left: auto; flex: none; font-family: var(--font-num); font-weight: 600; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 3px 7px; }
+.item .edit.on { color: var(--work); border-color: var(--work); }
+
+body.sheet-open { overflow: hidden; }
+.sheet-backdrop { position: fixed; inset: 0; z-index: 50; background: rgba(8, 10, 5, 0.55); display: flex; align-items: flex-end; justify-content: center; }
+.sheet-backdrop[hidden] { display: none; }
+.sheet { width: 100%; max-width: 428px; background: var(--surface); color: var(--fg); border: 2px solid var(--fg); border-bottom: 0; border-radius: 12px 12px 0 0; padding: 14px 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 8px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.sheet-head b { font-family: var(--font-display); font-weight: 400; font-size: 20px; letter-spacing: 0.03em; text-transform: uppercase; min-width: 0; overflow-wrap: anywhere; }
+.sheet-head .nav { flex: none; width: 44px; min-height: 44px; font-size: 22px; }
+.sheet-sub { margin: 0; color: var(--muted); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.wheel-wrap { position: relative; height: 220px; margin-block: 4px; overflow: hidden; }
+.wheel-band { position: absolute; left: 4px; right: 4px; top: 88px; height: 44px; border-radius: 10px; background: var(--work-soft); box-shadow: inset 0 0 0 1.5px var(--line); z-index: 0; pointer-events: none; }
+.wheel { position: relative; z-index: 1; height: 100%; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scrollbar-width: none; padding-block: 88px; outline: none; }
+.wheel::-webkit-scrollbar { display: none; }
+.wheel:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.wheel .it { height: 44px; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; font-family: var(--font-num); font-weight: 700; font-size: 32px; font-variant-numeric: tabular-nums; cursor: pointer; will-change: transform, opacity; backface-visibility: hidden; -webkit-backface-visibility: hidden; user-select: none; -webkit-user-select: none; }
+.wheel .it span { display: inline-block; width: 3ch; text-align: right; }
+.wheel-fade { position: absolute; left: 0; right: 0; height: 80px; z-index: 2; pointer-events: none; }
+.wheel-fade.top { top: 0; background: linear-gradient(var(--surface), transparent); }
+.wheel-fade.bot { bottom: 0; background: linear-gradient(transparent, var(--surface)); }
+.wheel-unit { position: absolute; right: 12px; top: 88px; height: 44px; display: flex; align-items: center; z-index: 3; pointer-events: none; font-family: var(--font-num); font-weight: 600; font-size: 19px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); max-width: 40%; line-height: 1; }
+.sheet-actions { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 8px; }
+.sheet-actions .btn { min-height: 52px; font-size: 16px; letter-spacing: 0.03em; padding-inline: 4px; white-space: nowrap; }
+.ctl .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ctl .row2 .btn { font-size: 16px; padding-inline: 4px; white-space: nowrap; letter-spacing: 0.04em; }
+#bSkip[data-mode="set"] { background: var(--work-soft); }
+#bSkip[data-mode="armed"] { background: var(--work); border-color: var(--work); color: var(--on-accent); }
+.sheet-actions.two { grid-template-columns: 1fr 1.4fr; }
+.split { display: grid; grid-template-columns: 1fr auto; }
+.split .btn { min-height: 46px; font-size: 19px; }
+.split #bSkip { border-radius: 4px 0 0 4px; border-right-width: 1px; }
+.split #bRestSet { border-radius: 0 4px 4px 0; border-left-width: 1px; min-width: 76px; background: var(--work-soft); letter-spacing: 0.04em; }
+.sheet-actions .btn.go { margin: 0; width: auto; min-height: 52px; font-size: 20px; }
+
 @media (prefers-reduced-motion: reduce) { .btn:active:not(:disabled) { transform: none; } }
 </style>
 
@@ -181,7 +219,7 @@ body[data-phase="rest"] .item.cur { background: var(--rest-soft); }
       <div>
         <span class="chip" id="chip">Exercise</span>
         <p class="pos" id="pos"></p>
-        <p class="name" id="name"></p>
+        <button class="name" id="name" type="button" aria-label="Adjust this exercise"></button>
       </div>
       <img class="pose" id="pose" alt="">
     </div>
@@ -200,8 +238,11 @@ body[data-phase="rest"] .item.cur { background: var(--rest-soft); }
     </div>
     <div class="ctl">
       <button class="btn" id="bToggle" type="button">Start</button>
-      <button class="btn" id="bReset" type="button">Reset</button>
-      <button class="btn" id="bSkip" type="button">Skip rest</button>
+      <div class="row2">
+        <button class="btn" id="bReset" type="button">Reset</button>
+        <button class="btn" id="bFinish" type="button">Finish now</button>
+      </div>
+      <button class="btn" id="bSkip" type="button" data-mode="set">Set rest &middot; 30s &#9662;</button>
     </div>
     <div class="opts">
       <div class="pace"><span>Pace</span><button class="nav" id="paceMinus" type="button" aria-label="Faster">&minus;</button><b id="paceVal">2.0 s/rep</b><button class="nav" id="pacePlus" type="button" aria-label="Slower">+</button></div>
@@ -213,6 +254,25 @@ body[data-phase="rest"] .item.cur { background: var(--rest-soft); }
     <h2><span id="listTitle">Day 1</span><button class="link" id="bClear" type="button">Reset day</button></h2>
     <ol class="items" id="items"></ol>
   </section>
+</div>
+
+<div class="sheet-backdrop" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head"><b id="sheetTitle">Exercise</b><button class="nav" id="sheetClose" type="button" aria-label="Close">&times;</button></div>
+    <p class="sheet-sub" id="sheetSub">Set reps</p>
+    <div class="wheel-wrap">
+      <div class="wheel-band" aria-hidden="true"></div>
+      <div class="wheel" id="wheel" tabindex="0" role="spinbutton" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Value"></div>
+      <div class="wheel-fade top" aria-hidden="true"></div>
+      <div class="wheel-fade bot" aria-hidden="true"></div>
+      <span class="wheel-unit" id="wheelUnit" aria-hidden="true">reps</span>
+    </div>
+    <div class="sheet-actions" id="sheetActions">
+      <button class="btn" id="sheetReset" type="button">Plan</button>
+      <button class="btn go" id="sheetSave" type="button">Save</button>
+      <button class="btn" id="sheetGo" type="button">Save &amp; go</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -259,13 +319,14 @@ var DAYS = [
   el.unit = el.secs.querySelector("small");
 
   var day = 0, cur = 0, phase = "exercise", done = [], running = false, endAt = 0, restLeft = REST, total = REST, side = 1, lastWhole = -1, wake = null,
-      setNo = 1, sets = 3, tempo = 2000, voiceOn = true, repR = 0, repN = 0, repStarted = false, repNext = 0, repLeft = 3000;
+      setNo = 1, sets = 3, tempo = 2000, voiceOn = true, repR = 0, repN = 0, repStarted = false, repNext = 0, repLeft = 3000, skipNext = false;
   try {
     var ss = parseInt(localStorage.getItem("calisthenics-sets"), 10); if (ss >= 1 && ss <= 10) sets = ss;
     var tt = parseInt(localStorage.getItem("calisthenics-tempo"), 10); if (tt >= 1000 && tt <= 6000) tempo = tt;
     if (localStorage.getItem("calisthenics-voice") === "off") voiceOn = false;
+    var rs = parseInt(localStorage.getItem("calisthenics-rest"), 10); if (rs >= 0 && rs <= 180) REST = rs * 1000;
   } catch (e) {}
-  function save() { try { localStorage.setItem("calisthenics-sets", String(sets)); localStorage.setItem("calisthenics-tempo", String(tempo)); localStorage.setItem("calisthenics-voice", voiceOn ? "on" : "off"); } catch (e) {} }
+  function save() { try { localStorage.setItem("calisthenics-sets", String(sets)); localStorage.setItem("calisthenics-tempo", String(tempo)); localStorage.setItem("calisthenics-voice", voiceOn ? "on" : "off"); localStorage.setItem("calisthenics-rest", String(Math.round(REST / 1000))); } catch (e) {} }
   try { var sd = parseInt(localStorage.getItem("calisthenics-day"), 10); if (sd >= 0 && sd < DAYS.length) day = sd; } catch (e) {}
   for (var d = 0; d < DAYS.length; d++) { var o = document.createElement("option"); o.value = d; o.textContent = "Day " + (d + 1); el.day.appendChild(o); }
 
@@ -298,21 +359,30 @@ var DAYS = [
     try { if (!window.speechSynthesis) return; window.speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(txt); u.rate = 1.05; window.speechSynthesis.speak(u); } catch (e) {}
   }
   function hush() { try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {} }
-  function holdMs(i) {
-    var s = DAYS[day][i] || "", m = /^(\d+)s (?:side )?plank/i.exec(s);
-    if (m) return parseInt(m[1], 10) * 1000;
-    if (/^1-min (?:side )?plank/i.test(s)) return 60000;
-    return 0;
+  var OV = {};
+  try { OV = JSON.parse(localStorage.getItem("calisthenics-overrides") || "{}") || {}; } catch (e) { OV = {}; }
+  function saveOV() { try { localStorage.setItem("calisthenics-overrides", JSON.stringify(OV)); } catch (e) {} }
+  function okey(i) { return day + ":" + i; }
+  function isTimed(i) { return /^(\d+s|1-min) (?:side )?plank/i.test(DAYS[day][i] || ""); }
+  function planVal(i) {
+    var s = DAYS[day][i] || "", m = /^(\d+)s /.exec(s);
+    if (isTimed(i)) return m ? parseInt(m[1], 10) : 60;
+    m = /^(\d+)\s/.exec(s); return m ? parseInt(m[1], 10) : 0;
   }
-  function repsOf(i) { if (holdMs(i) > 0) return 0; var m = /^(\d+)\s/.exec(DAYS[day][i] || ""); return m ? parseInt(m[1], 10) : 0; }
+  function valOf(i) { var v = OV[okey(i)]; return (typeof v === "number" && v >= 0) ? v : planVal(i); }
+  function holdMs(i) { return isTimed(i) ? valOf(i) * 1000 : 0; }
+  function repsOf(i) { return isTimed(i) ? 0 : valOf(i); }
   function isHold(i) { return holdMs(i) > 0; }
   function isReps(i) { return repsOf(i) > 0; }
+  function nameOf(i) {
+    var s = DAYS[day][i] || "", v = valOf(i);
+    return isTimed(i) ? s.replace(/^(\d+s|1-min)/i, v + "s") : s.replace(/^\d+/, String(v));
+  }
   function isSide(i) { return /side plank|each leg/i.test(DAYS[day][i] || ""); }
-  function nameOf(i) { return DAYS[day][i]; }
   function active() { return phase === "rest" || phase === "hold" || phase === "switch" || phase === "reps"; }
   function left() { return running ? Math.max(0, endAt - performance.now()) : restLeft; }
   function stopTimer() {
-    hush(); side = 1; running = false; lastWhole = -1; unlock();
+    hush(); side = 1; skipNext = false; running = false; lastWhole = -1; unlock();
     total = (phase === "exercise" && isHold(cur)) ? holdMs(cur) : REST; restLeft = total;
     repN = repsOf(cur); repR = repN; repStarted = false; repLeft = 3000;
   }
@@ -327,25 +397,31 @@ var DAYS = [
       beep(523, 0, 0.3, 0.3, "triangle"); beep(659, 0.2, 0.3, 0.3, "triangle"); beep(784, 0.4, 0.3, 0.3, "triangle"); beep(1047, 0.6, 0.7, 0.3, "triangle"); buzz([200, 100, 200, 100, 400]);
       speak("Workout complete. Well done.");
     } else {
+      if (REST <= 0 || skipNext) { endRest(true); return; }
       startTimer("rest"); if (!silent) beep(440, 0, 0.18, 0.25, "sine");
       speak(cur >= n - 1 ? "Set complete. Rest." : "Rest.");
     }
     renderAll();
   }
+  function beginExercise(prefix, quiet) {
+    prefix = prefix || "";
+    if (isHold(cur)) {
+      side = 1; startTimer("hold"); if (!quiet) beep(660, 0, 0.18, 0.28, "triangle");
+      speak(prefix + Math.round(total / 1000) + " second " + (isSide(cur) ? "side plank, each side" : "plank hold") + ". Get ready.");
+      return true;
+    }
+    if (isReps(cur)) {
+      side = 1; startReps(3000); if (!quiet) beep(660, 0, 0.18, 0.28, "triangle");
+      speak(prefix + nameOf(cur) + ". Get ready.");
+      return true;
+    }
+    return false;
+  }
   function exerciseDone() {
     audio();
     if (phase === "complete") { resetDay(); return; }
     if (phase !== "exercise") return;
-    if (isHold(cur)) {
-      side = 1; startTimer("hold"); beep(660, 0, 0.18, 0.28, "triangle");
-      speak(Math.round(total / 1000) + " second " + (isSide(cur) ? "side plank, each side" : "plank hold") + ". Get ready.");
-      renderAll(); return;
-    }
-    if (isReps(cur)) {
-      side = 1; startReps(3000); beep(660, 0, 0.18, 0.28, "triangle");
-      speak(nameOf(cur) + ". Get ready.");
-      renderAll(); return;
-    }
+    if (beginExercise("", false)) { renderAll(); return; }
     finishExercise(false);
   }
   function afterSide() {
@@ -373,7 +449,8 @@ var DAYS = [
     if (newSet) { setNo = Math.min(setNo + 1, sets); cur = 0; done = []; } else cur++;
     phase = "exercise"; stopTimer();
     if (!silent) { beep(880, 0, 0.14, 0.32, "triangle"); beep(880, 0.2, 0.14, 0.32, "triangle"); beep(1320, 0.4, 0.5, 0.34, "triangle"); buzz([300, 100, 300]); }
-    speak((newSet ? "Set " + setNo + " of " + sets + ". " : "") + "Next: " + nameOf(cur));
+    var pre = newSet ? "Set " + setNo + " of " + sets + ". " : "";
+    if (!beginExercise(pre, !silent)) speak(pre + "Next: " + nameOf(cur));
     renderAll();
   }
   function toggle() {
@@ -393,10 +470,14 @@ var DAYS = [
     if (phase === "reps") { repR = repN; repStarted = false; repLeft = 3000; } else restLeft = total;
     renderAll();
   }
-  function skip() {
-    if (phase === "rest") endRest(true);
-    else if (phase === "switch") { if (isReps(cur)) startReps(1000); else startTimer("hold"); renderAll(); }
+  function finish() {
+    if (phase === "switch") { if (isReps(cur)) startReps(1000); else startTimer("hold"); renderAll(); }
     else if (phase === "hold" || phase === "reps") { running = false; unlock(); hush(); afterSide(); }
+  }
+  function restBtn() {
+    if (phase === "rest") endRest(true);
+    else if (phase === "hold" || phase === "reps" || phase === "switch") { skipNext = !skipNext; renderAll(); }
+    else openRestSheet();
   }
   function resetDay() { setNo = 1; cur = 0; phase = "exercise"; done = []; stopTimer(); renderAll(); }
   function loadDay(n) { day = n; try { localStorage.setItem("calisthenics-day", String(day)); } catch (e) {} resetDay(); }
@@ -463,11 +544,11 @@ var DAYS = [
     } else {
       el.chip.textContent = phase === "rest" ? "Rest" : phase === "switch" ? "Switch sides"
         : (phase === "hold" || phase === "reps") ? (isSide(cur) ? "Side " + side + " of 2" : (phase === "reps" ? "Reps" : "Plank hold")) : "Exercise";
-      el.pos.textContent = "Exercise " + (cur + 1) + " of " + n;
-      el.name.textContent = ex[cur];
-      var nx = ex[cur + 1], lastEx = cur >= n - 1;
-      var after = nx ? "rest and <b>" + nx + "</b>" : (setNo < sets ? "rest and start <b>set " + (setNo + 1) + "</b>" : "<b>finish the day</b>");
-      el.upnext.innerHTML = phase === "rest" ? "Rest, then <b>" + (nx || (setNo < sets ? "set " + (setNo + 1) : "finish")) + "</b>"
+      el.pos.textContent = "Exercise " + (cur + 1) + " of " + n + " · tap to adjust";
+      el.name.textContent = nameOf(cur);
+      var nx = cur + 1 < n ? nameOf(cur + 1) : "", lastEx = cur >= n - 1;
+      var after = skipNext ? (nx ? "go straight to <b>" + nx + "</b>" : (setNo < sets ? "start <b>set " + (setNo + 1) + "</b>" : "<b>finish the day</b>")) : (nx ? "rest and <b>" + nx + "</b>" : (setNo < sets ? "rest and start <b>set " + (setNo + 1) + "</b>" : "<b>finish the day</b>"));
+      el.upnext.innerHTML = phase === "rest" ? "Rest, then <b>" + (nx || (setNo < sets ? "set " + (setNo + 1) : "finish")) + "</b>" + (nx || setNo < sets ? " starts automatically" : "")
         : phase === "switch" ? "Get in position on the other side. Side 2 starts automatically."
         : (phase === "hold" || phase === "reps") && isSide(cur) && side === 1 ? (phase === "reps" ? "Count down with the voice, then switch sides." : "Hold steady. Switch sides when the time is up.")
         : phase === "reps" ? "Move with the voice count, then " + after
@@ -479,29 +560,149 @@ var DAYS = [
     }
     el.bDone.disabled = on;
     el.bToggle.textContent = running ? "Pause" : (phase === "reps" ? (repStarted || repR < repN ? "Resume" : "Start") : (restLeft < total ? "Resume" : "Start"));
-    el.bToggle.disabled = !on; el.bReset.disabled = !on; el.bSkip.disabled = !on;
-    el.bSkip.textContent = phase === "switch" ? "Start side 2" : (phase === "hold" || phase === "reps") ? (isSide(cur) && side === 1 ? "Next side" : "Finish now") : "Skip rest";
+    var working = phase === "hold" || phase === "reps" || phase === "switch";
+    el.bToggle.disabled = !on; el.bReset.disabled = !on; el.bFinish.disabled = !working; el.bSkip.disabled = false;
+    el.bFinish.textContent = phase === "switch" ? "Start side 2" : (isSide(cur) && side === 1 ? "Next side" : "Finish now");
+    el.bSkip.textContent = phase === "rest" ? "Skip rest" : working ? (skipNext ? "Rest skipped \u2713" : "Skip rest") : "Set rest \u00B7 " + Math.round(REST / 1000) + "s \u25BE";
+    el.bSkip.setAttribute("data-mode", phase === "rest" ? "skip" : working ? (skipNext ? "armed" : "skip") : "set");
     el.restTitle.textContent = phase === "switch" ? "Switch sides"
       : (phase === "reps" || (phase === "exercise" && reps)) ? "Rep counter"
       : (phase === "hold" || (phase === "exercise" && hold)) ? (isSide(cur) ? "Side plank timer" : "Plank hold timer") : "Rest stopwatch";
     el.restState.textContent = on ? (running ? "running" : "paused")
       : (phase === "exercise" && reps ? repsOf(cur) + (isSide(cur) ? " each leg" : " reps")
-      : (phase === "exercise" && hold ? Math.round(total / 1000) + (isSide(cur) ? " sec each side" : " sec hold") : "30 sec rest"));
+      : (phase === "exercise" && hold ? Math.round(total / 1000) + (isSide(cur) ? " sec each side" : " sec hold") : Math.round(REST / 1000) + " sec rest"));
 
     var html = "";
     for (var i = 0; i < n; i++) {
       var c = "item" + (done[i] ? " done" : "") + (i === cur && phase !== "complete" ? " cur" : "");
-      html += '<li><button class="' + c + '" type="button" data-i="' + i + '"><span class="n">' + (done[i] ? "&#10003;" : (i + 1)) + '</span><span class="t">' + ex[i] + '</span></button></li>';
+      html += '<li><button class="' + c + '" type="button" data-i="' + i + '"><span class="n">' + (done[i] ? "&#10003;" : (i + 1)) + '</span><span class="t">' + nameOf(i) + '</span><span class="edit' + (OV[okey(i)] !== undefined ? " on" : "") + '">' + (OV[okey(i)] !== undefined ? "Edited" : "Adjust") + '</span></button></li>';
     }
     el.items.innerHTML = html;
     renderTimer();
   }
 
+  /* wheel picker (looping drum, like the iOS timer) */
+  var ROW = 44, STEP = 22 * Math.PI / 180, DR = ROW / STEP;
+  var sheetMode = "ex", sheetIdx = 0, wheelN = 101, wheelTotal = 303, wheelVal = 0, wheelLo = 0, wheelHi = -1, wheelRaf = 0, wheelTimer = 0, holding = false, sheetOpener = null;
+  var sh = { box: $("sheet"), actions: $("sheetActions"), title: $("sheetTitle"), sub: $("sheetSub"), wheel: $("wheel"), unit: $("wheelUnit"), close: $("sheetClose"), save: $("sheetSave"), go: $("sheetGo"), reset: $("sheetReset") };
+  el.bFinish = $("bFinish");
+  function wheelStyle(i, pos) {
+    var it = sh.wheel.children[i]; if (!it) return;
+    var d = i - pos, a = Math.abs(d);
+    if (a > 3.4) { it.style.opacity = "0"; it.style.transform = ""; return; }
+    var th = d * STEP, dy = DR * Math.sin(th) - d * ROW, dz = DR * (Math.cos(th) - 1);
+    it.style.opacity = Math.max(0.1, Math.pow(Math.cos(th), 2.2)).toFixed(3);
+    it.style.transform = "perspective(700px) translateY(" + dy.toFixed(1) + "px) translateZ(" + dz.toFixed(1) + "px) rotateX(" + (-th * 180 / Math.PI).toFixed(1) + "deg)";
+  }
+  function wheelUpdate() {
+    wheelRaf = 0;
+    var pos = sh.wheel.scrollTop / ROW, idx = Math.max(0, Math.min(wheelTotal - 1, Math.round(pos)));
+    var lo = Math.max(0, Math.floor(pos) - 4), hi = Math.min(wheelTotal - 1, Math.ceil(pos) + 4);
+    var a = Math.max(0, Math.min(lo, wheelLo)), b = Math.min(wheelTotal - 1, Math.max(hi, wheelHi));
+    for (var i = a; i <= b; i++) wheelStyle(i, pos);
+    wheelLo = lo; wheelHi = hi;
+    var v = idx % wheelN;
+    if (v !== wheelVal) { wheelVal = v; sh.wheel.setAttribute("aria-valuenow", String(v)); if (ctx) beep(2200, 0, 0.012, 0.04, "square"); }
+  }
+  function wheelNormalize() {
+    if (holding || sh.box.hidden) return;
+    var idx = Math.round(sh.wheel.scrollTop / ROW), shift = 0;
+    if (idx < wheelN) shift = wheelN; else if (idx >= 2 * wheelN) shift = -wheelN;
+    if (!shift) return;
+    for (var i = wheelLo; i <= wheelHi; i++) { var it = sh.wheel.children[i]; if (it) { it.style.opacity = "0"; it.style.transform = ""; } }
+    sh.wheel.scrollTop = sh.wheel.scrollTop + shift * ROW;
+    wheelLo = 0; wheelHi = -1; wheelUpdate();
+  }
+  function wheelGo(idx, smooth) {
+    idx = Math.max(0, Math.min(wheelTotal - 1, idx));
+    if (sh.wheel.scrollTo) sh.wheel.scrollTo({ top: idx * ROW, behavior: smooth ? "smooth" : "auto" }); else sh.wheel.scrollTop = idx * ROW;
+  }
+  function wheelTo(v) {
+    var idx = Math.round(sh.wheel.scrollTop / ROW), cv = idx % wheelN, d = ((v - cv) % wheelN + wheelN) % wheelN;
+    if (d > wheelN / 2) d -= wheelN;
+    wheelGo(idx + d, true);
+  }
+  function wheelValue() { return Math.round(sh.wheel.scrollTop / ROW) % wheelN; }
+  function showWheel(o) {
+    audio();
+    sheetOpener = document.activeElement;
+    wheelN = o.max + 1; wheelTotal = wheelN * 3;
+    sh.title.textContent = o.title; sh.sub.textContent = o.sub; sh.unit.textContent = o.unit;
+    sh.go.hidden = !o.go; sh.actions.classList.toggle("two", !o.go);
+    sh.wheel.setAttribute("aria-valuemax", String(o.max)); sh.wheel.setAttribute("aria-valuenow", String(o.value)); sh.wheel.setAttribute("aria-label", o.unit);
+    var h = "";
+    for (var c = 0; c < 3; c++) for (var k = 0; k <= o.max; k++) h += '<div class="it" data-i="' + (c * wheelN + k) + '" style="opacity:0"><span>' + k + "</span></div>";
+    sh.wheel.innerHTML = h; wheelLo = 0; wheelHi = -1; wheelVal = o.value; holding = false;
+    sh.box.hidden = false; document.body.classList.add("sheet-open");
+    requestAnimationFrame(function () { sh.wheel.scrollTop = (wheelN + o.value) * ROW; wheelUpdate(); try { sh.wheel.focus({ preventScroll: true }); } catch (e) {} });
+  }
+  function openSheet(i) {
+    sheetMode = "ex"; sheetIdx = i;
+    var timed = isTimed(i), base = DAYS[day][i] || "";
+    showWheel({
+      title: base.replace(/^(\d+s|1-min|\d+)\s*/i, ""),
+      sub: (timed ? "Set seconds, 0 to 180" : "Set reps, 0 to 100") + " · plan " + planVal(i),
+      unit: timed ? (isSide(i) ? "sec each side" : "sec") : (isSide(i) ? "reps each leg" : "reps"),
+      max: timed ? 180 : 100, value: valOf(i), go: true
+    });
+  }
+  function openRestSheet() {
+    sheetMode = "rest";
+    showWheel({ title: "Rest time", sub: "Seconds between exercises · plan 30", unit: "sec", max: 180, value: Math.round(REST / 1000), go: false });
+  }
+  function closeSheet() {
+    sh.box.hidden = true; document.body.classList.remove("sheet-open"); clearTimeout(wheelTimer);
+    try { if (sheetOpener && sheetOpener.focus) sheetOpener.focus({ preventScroll: true }); } catch (e) {}
+  }
+  function applyRest(sec) {
+    REST = sec * 1000; save();
+    if (phase === "rest") {
+      if (REST <= 0) { running = false; unlock(); endRest(true); return; }
+      total = REST; restLeft = REST; endAt = performance.now() + REST; lastWhole = -1;
+    } else if (phase === "exercise" || phase === "complete") stopTimer();
+    renderAll();
+  }
+  function saveSheet(go) {
+    var v = wheelValue();
+    if (sheetMode === "rest") { closeSheet(); applyRest(v); return; }
+    var i = sheetIdx;
+    if (v === planVal(i)) delete OV[okey(i)]; else OV[okey(i)] = v;
+    saveOV(); closeSheet();
+    if (go || (i === cur && (phase === "hold" || phase === "reps" || phase === "switch"))) { cur = i; phase = "exercise"; stopTimer(); }
+    else if (i === cur && phase === "exercise") stopTimer();
+    renderAll();
+  }
+  function release() { holding = false; clearTimeout(wheelTimer); wheelTimer = setTimeout(wheelNormalize, 200); }
+  sh.wheel.addEventListener("scroll", function () {
+    if (!wheelRaf) wheelRaf = requestAnimationFrame(wheelUpdate);
+    clearTimeout(wheelTimer); wheelTimer = setTimeout(wheelNormalize, 160);
+  }, { passive: true });
+  sh.wheel.addEventListener("touchstart", function () { holding = true; }, { passive: true });
+  sh.wheel.addEventListener("touchend", release, { passive: true });
+  sh.wheel.addEventListener("touchcancel", release, { passive: true });
+  sh.wheel.addEventListener("click", function (e) { var it = e.target.closest(".it"); if (it) wheelGo(parseInt(it.getAttribute("data-i"), 10), true); });
+  sh.wheel.addEventListener("keydown", function (e) {
+    var idx = Math.round(sh.wheel.scrollTop / ROW);
+    if (e.key === "ArrowUp") { e.preventDefault(); wheelGo(idx - 1, true); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); wheelGo(idx + 1, true); }
+    else if (e.key === "PageUp") { e.preventDefault(); wheelGo(idx - 10, true); }
+    else if (e.key === "PageDown") { e.preventDefault(); wheelGo(idx + 10, true); }
+    else if (e.key === "Enter") { e.preventDefault(); saveSheet(false); }
+  });
+  sh.save.addEventListener("click", function () { saveSheet(false); });
+  sh.go.addEventListener("click", function () { saveSheet(true); });
+  sh.reset.addEventListener("click", function () { wheelTo(sheetMode === "rest" ? 30 : planVal(sheetIdx)); });
+  sh.close.addEventListener("click", closeSheet);
+  sh.box.addEventListener("click", function (e) { if (e.target === sh.box) closeSheet(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sh.box.hidden) closeSheet(); });
+
   /* events */
   el.bDone.addEventListener("click", exerciseDone);
+  el.name.addEventListener("click", function () { if (phase !== "complete") openSheet(cur); });
   el.bToggle.addEventListener("click", toggle);
   el.bReset.addEventListener("click", resetTimer);
-  el.bSkip.addEventListener("click", skip);
+  el.bSkip.addEventListener("click", restBtn);
+  el.bFinish.addEventListener("click", finish);
   el.bClear.addEventListener("click", resetDay);
   el.setMinus.addEventListener("click", function () { changeSets(-1); });
   el.setPlus.addEventListener("click", function () { changeSets(1); });
@@ -513,7 +714,7 @@ var DAYS = [
   el.next.addEventListener("click", function () { if (day < DAYS.length - 1) loadDay(day + 1); });
   el.items.addEventListener("click", function (e) {
     var b = e.target.closest("button[data-i]"); if (!b) return;
-    cur = parseInt(b.getAttribute("data-i"), 10); phase = "exercise"; stopTimer(); renderAll();
+    openSheet(parseInt(b.getAttribute("data-i"), 10));
   });
 
   resetDay();
